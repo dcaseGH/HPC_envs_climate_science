@@ -1,0 +1,2 @@
+git clone git@github.com:MetOffice/mo-spack-packages.git
+git clone --depth=2 --branch=releases/v1.2 https://github.com/spack/spack.git spack

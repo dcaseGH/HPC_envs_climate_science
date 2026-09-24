@@ -1,0 +1,111 @@
+# Archer2 spack for lfric_apps (and um?)
+# Hopefully works on others, particularly cray or things with modules
+# Sticks to things supported by MO spack packages
+# To modify, get all the hard-coded lines and load the modules on your system, then check prefixes etc
+
+spack:
+
+  definitions:
+  - compilers:
+    - gcc@11.2.0
+
+  - mpi_libs:
+    - mpich
+
+  - serial_libs:
+    - gftl-shared@1.9.0
+    - shumlib@2026.07.2+openmp
+
+  - parallel_libs:
+    - boost@1.86.0
+    - hdf5@1.14.5
+    - netcdf-c@4.9.2
+    - netcdf-fortran@4.6.1
+    - nccmp@1.9.1.0
+    - oasis@3-mct5.0
+    - xios@2.2701 +oasis
+    - yaxt@0.11.0
+    - pfunit@4.10.0 +mpi
+    - esmf@8.7.0 +external-lapack ^openblas
+    - eccodes@2.34.0 +tools +netcdf +png +openmp +fortran
+
+  specs:
+
+  - matrix:
+    - [$serial_libs]
+    - [$%compilers]
+
+  - matrix:
+    - [$parallel_libs]
+    - [$^mpi_libs]
+    - [$%compilers]
+
+  # Change this for HPC system - may need to be explicit about prefix
+  packages:
+    gcc:
+      externals:
+      - spec: gcc@11.2.0 languages:='c,c++,fortran'
+        prefix: /opt/cray/pe/gcc/11.2.0/snos
+        extra_attributes:
+          compilers:
+            c: /opt/cray/pe/gcc/11.2.0/snos/bin/gcc
+            cxx: /opt/cray/pe/gcc/11.2.0/snos/bin/g++
+            fortran: /opt/cray/pe/gcc/11.2.0/snos/bin/gfortran
+      - spec: gcc@7.5.0 languages:='c,c++,fortran'
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            fortran: /usr/bin/gfortran
+    all:
+      compiler: [gcc@11.2.0, cce@15.0.0]
+      providers:
+        mpi: [cray-mpich]
+
+    cray-mpich:
+      externals:
+      - spec: cray-mpich@8.1.23 %gcc@11.2.0
+        modules: [cray-mpich/8.1.23]
+      buildable: false
+
+    hdf5:
+      externals:
+      - spec: hdf5@1.12.2.1 +fortran +mpi %gcc@11.2.0
+        modules: [PrgEnv-gnu, cray-hdf5-parallel/1.12.2.1]
+      buildable: false
+
+    netcdf-c:
+      externals:
+      - spec: netcdf-c@4.9.0.7 +mpi %gcc@11.2.0
+        modules: [PrgEnv-gnu, cray-hdf5-parallel/1.12.2.1, cray-netcdf-hdf5parallel/4.9.0.7]
+        prefix: /opt/cray/pe/netcdf-hdf5parallel/4.9.0.7/gnu/9.1
+      buildable: false
+
+    netcdf-fortran:
+      externals:
+      - spec: netcdf-fortran@4.9.0.7
+        modules: [PrgEnv-gnu, cray-hdf5-parallel/1.12.2.1, cray-netcdf-hdf5parallel/4.9.0.7]
+        prefix: /opt/cray/pe/netcdf-hdf5parallel/4.9.0.7/gnu/9.1
+      buildable: false
+
+    cmake:
+      externals:
+      - spec: cmake@3.21.3
+        modules: [cmake/3.21.3]
+      buildable: false
+
+  concretizer:
+    unify: when_possible
+
+  view: true
+
+  #not sure if better to get modules working or stick to view for now
+  modules:
+    default:
+      'enable:': [lmod]
+      lmod:
+        core_compilers:
+        - gcc@7.5.0/3ys6m7gcjqy6o6csilmkufeagkd64ry3
+  repos:
+    metoffice: /mnt/lustre/a2fs-work2/work/n02/n02/dcase/HPC_envs_climate_science/archer2/mo-spack-packages/spack_repo/metoffice
