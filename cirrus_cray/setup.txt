@@ -1,0 +1,4 @@
+export SPACK_USER_CONFIG_PATH="${PWD}/.spack"
+export SPACK_USER_CACHE_PATH="${PWD}/.spack/cache"
+git clone git@github.com:MetOffice/mo-spack-packages.git
+git clone --depth=2 --branch=releases/v1.2 https://github.com/spack/spack.git spack

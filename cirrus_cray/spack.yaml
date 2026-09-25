@@ -1,0 +1,98 @@
+# Archer2 spack for lfric_apps (and um?)
+# Hopefully works on others, particularly cray or things with modules
+# Sticks to things supported by MO spack packages
+# To modify, get all the hard-coded lines and load the modules on your system, then check prefixes etc
+
+spack:
+
+  definitions:
+  - compilers:
+    - cce@19.0.0
+
+  - mpi_libs:
+    - cray-mpich
+
+  - serial_libs:
+    - gftl-shared@1.9.0
+    - shumlib@2026.07.2+openmp
+
+  - parallel_libs:
+    - boost@1.86.0
+    - hdf5@1.14.3
+    - netcdf-c@4.9.0
+    - netcdf-fortran@4.5.3
+    - nccmp@1.9.1.0
+    - oasis@3-mct5.0 ^netcdf-fortran@4.5.3
+    - xios@2.2701 +oasis
+    - yaxt@0.11.0
+    - pfunit@4.10.0 +mpi
+    - esmf@8.7.0 +external-lapack ^openblas
+    - eccodes@2.34.0 +tools +netcdf +png +openmp +fortran
+
+  specs:
+
+  - matrix:
+    - [$serial_libs]
+    - [$%compilers]
+
+  - matrix:
+    - [$parallel_libs]
+    - [$^mpi_libs]
+    - [$%compilers]
+
+  packages:
+    cce:
+      externals:
+      - spec: cce@19.0.0 languages=c,c++,fortran
+        prefix: /opt/cray/pe/craype/2.7.34/bin
+        extra_attributes:
+          compilers:
+            c: /opt/cray/pe/craype/2.7.34/bin/cc
+            cxx: /opt/cray/pe/craype/2.7.34/bin/CC
+            fortran: /opt/cray/pe/craype/2.7.34/bin/ftn
+
+    all:
+      compiler: [cce@19.0.0]
+      providers:
+        mpi: [cray-mpich]
+#      require:
+#      - "netcdf-fortran@4.5.3"
+
+    cray-mpich:
+      externals:
+      - spec: cray-mpich@3.4a2 %cce@19.0.0
+      buildable: false
+
+    hdf5:
+      externals:
+      - spec: hdf5@1.14.3~cxx+fortran+hl~java~map+mpi+shared~subfiling~szip~threadsafe+tools api=v114 %cce@19.0.0 ^cray-mpich
+        modules: [PrgEnv-cray, cray-hdf5-parallel, cray-netcdf-hdf5parallel]
+        prefix: /opt/cray/pe/hdf5-parallel/1.14.3.5/cray/18.0
+      buildable: false
+
+    netcdf-c:
+      externals:
+      - spec: netcdf-c@4.9.0.17+blosc~byterange~dap~fsync~hdf4~jna~logging+mpi~nczarr_zip+optimize~parallel-netcdf+pic+shared+szip+zstd %cce@19.0.0 ^cray-mpich
+        modules: [PrgEnv-cray, cray-hdf5-parallel, cray-netcdf-hdf5parallel]
+        prefix: /opt/cray/pe/netcdf-hdf5parallel/4.9.0.17/crayclang/18.0
+      buildable: false
+
+    netcdf-fortran:
+      externals:
+      - spec: netcdf-fortran@4.5.3~doc+pic+shared %cce@19.0.0 
+        modules: [PrgEnv-cray, cray-hdf5-parallel, cray-netcdf-hdf5parallel]
+        prefix: /opt/cray/pe/netcdf-hdf5parallel/4.9.0.17/crayclang/18.0
+      buildable: false
+
+    cmake:
+      externals:
+      - spec: cmake@4.1.2 %cce@19.0.0
+        modules: [cmake]
+      buildable: true
+
+  concretizer:
+    unify: false
+
+  view: true
+  repos:
+    metoffice: /mnt/nfs/epccfs/projects/dc169/dc169/dcase_cirrus/HPC_envs_climate_science/cirrus_cray/mo-spack-packages/spack_repo/metoffice
